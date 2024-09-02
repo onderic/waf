@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block title %}Measurements{% endblock %}
+
+{% block content %}
+<div class="bg-gray-100">
+    <div class="container mx-auto mt-6">
+        <h1 class="text-3xl font-bold text-center">Measurements</h1>
+        <p class="text-gray-700 mt-4 text-center">Students will gain an understanding of units of measurement, which include length, weight, and capacity. They will learn to measure using standard units like inches, feet, centimeters, and meters.</p>
+        
+        <!-- Measurement Section -->
+        <div class="mt-8 p-6 bg-white rounded shadow-md">
+            <h2 class="text-xl font-semibold">Explore Units of Measurement</h2>
+            <p class="mt-4">Select a unit to learn more:</p>
+            <div class="flex mt-4">
+                <button class="measurement-button bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mr-2" data-unit="length">Length</button>
+                <button class="measurement-button bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mr-2" data-unit="weight">Weight</button>
+                <button class="measurement-button bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600" data-unit="capacity">Capacity</button>
+            </div>
+            <div id="measurementVisualization" class="mt-4 text-green-600">
+                <!-- Visualization will appear here -->
+            </div>
+        </div>
+
+        <!-- Quiz Section -->
+        <div class="mt-8 p-6 bg-white rounded shadow-md">
+            <h2 class="text-xl font-semibold">Quiz: Identify the Unit</h2>
+            <div id="quizContainer" class="mt-4">
+                <!-- Quiz questions will be inserted here -->
+            </div>
+            <button id="submitQuizButton" class="mt-4 bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Submit Answers</button>
+            <div id="quizResult" class="mt-4 text-green-600"></div>
+        </div>
+
+        <div class="mt-8 text-center">
+            <a href="{% url 'home' %}" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Back to Problems</a>
+        </div>
+    </div>
+
+    <script>
+        // Measurement Visualization Functionality
+        document.querySelectorAll('.measurement-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const unit = this.getAttribute('data-unit');
+                const measurementVisualization = document.getElementById('measurementVisualization');
+                
+                switch(unit) {
+                    case 'length':
+                        measurementVisualization.innerHTML = `<p class="mt-2">Length is measured in units like inches, feet, centimeters, and meters.</p>`;
+                        break;
+                    case 'weight':
+                        measurementVisualization.innerHTML = `<p class="mt-2">Weight is measured in units like pounds, ounces, grams, and kilograms.</p>`;
+                        break;
+                    case 'capacity':
+                        measurementVisualization.innerHTML = `<p class="mt-2">Capacity is measured in units like cups, pints, liters, and gallons.</p>`;
+                        break;
+                    default:
+                        measurementVisualization.innerHTML = `<p class="text-red-600">Invalid unit selected.</p>`;
+                }
+            });
+        });
+
+        // Quiz Functionality
+        const quizQuestions = [
+            { question: "Which unit is used to measure length?", options: ["grams", "meters", "liters"], answer: "meters" },
+            { question: "Which unit is used to measure weight?", options: ["pounds", "feet", "gallons"], answer: "pounds" },
+            { question: "Which unit is used to measure capacity?", options: ["centimeters", "ounces", "liters"], answer: "liters" },
+        ];
+
+        function loadQuiz() {
+            const quizContainer = document.getElementById('quizContainer');
+            quizQuestions.forEach((q, index) => {
+                let optionsHtml = '';
+                q.options.forEach(option => {
+                    optionsHtml += `
+                        <label class="inline-flex items-center mt-2">
+                            <input type="radio" name="question${index}" value="${option}" class="form-radio text-green-600">
+                            <span class="ml-2">${option}</span>
+                        </label>
+                    `;
+                });
+                quizContainer.innerHTML += `
+                    <div class="mt-2">
+                        <label class="text-gray-700">${q.question}</label>
+                        <div class="mt-2">${optionsHtml}</div>
+                    </div>
+                `;
+            });
+        }
+
+        loadQuiz();
+
+        document.getElementById('submitQuizButton').addEventListener('click', function() {
+            let score = 0;
+            quizQuestions.forEach((q, index) => {
+                const selectedOption = document.querySelector(`input[name="question${index}"]:checked`);
+                if (selectedOption && selectedOption.value === q.answer) {
+                    score++;
+                }
+            });
+            const totalQuestions = quizQuestions.length;
+            const quizResult = document.getElementById('quizResult');
+            quizResult.innerHTML = `<p>You scored ${score} out of ${totalQuestions}.</p>`;
+
+            // Submit score to the server
+            submitScore(score, totalQuestions);
+        });
+
+        function submitScore(score, totalQuestions) {
+            fetch("{% url 'submit_score' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ score: score, totalQuestions: totalQuestions })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Score submitted successfully:', data);
+            })
+            .catch((error) => {
+                console.error('Error submitting score:', error);
+            });
+        }
+    </script>
+</div>
+
+{% endblock %}

@@ -1,0 +1,185 @@
+{% extends 'base.html' %}
+
+{% block title %}Number Sense{% endblock %}
+
+{% block content %}
+<div class="bg-gray-100">
+    <div class="container mx-auto mt-6">
+        <h1 class="text-3xl font-bold text-center">Number Sense</h1>
+        <p class="text-gray-700 mt-4 text-center">Understanding place values is essential, as is the ability to read and write numbers up to at least 1,000. Students should be able to compare and order numbers while recognizing odd and even numbers.</p>
+        
+        <!-- Visualization Section -->
+        <div class="mt-8 p-6 bg-white rounded shadow-md">
+            <h2 class="text-xl font-semibold">Visualize Numbers</h2>
+            <div class="visualization" id="numberVisualization" class="mt-4"></div>
+            <div class="mt-4">
+                <label for="numberInput" class="text-gray-700">Enter a number (1-1000):</label>
+                <div class="flex items-center mt-2">
+                    <input type="number" id="numberInput" class="border border-gray-400 rounded p-2 flex-grow" min="1" max="1000">
+                    <button id="visualizeButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 ml-2">Visualize</button>
+                    <button id="readButton" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 ml-2">Read Number</button>
+                </div>
+            </div>
+            <div id="numberDetails" class="mt-4 text-blue-600 "></div>
+        </div>
+
+        <!-- Quiz Section -->
+        <div class="mt-8 p-6 bg-white rounded shadow-md">
+            <h2 class="text-xl font-semibold">Take a Quiz</h2>
+            <p class="text-gray-700 mt-2">Test your knowledge about number sense!</p>
+
+            <div class="mt-4">
+                <div class="quiz-question">
+                    <label>1. What is an even number?</label>
+                    <input type="text" class="quizAnswer border border-gray-400 rounded p-2 mt-2 flex-grow">
+                    <div class="quizResult mt-2"></div>
+                    <div class="correctAnswer mt-1 text-gray-500"></div>
+                </div>
+
+                <div class="quiz-question mt-4">
+                    <label>2. What is 7 + 5?</label>
+                    <input type="text" class="quizAnswer border border-gray-400 rounded p-2 mt-2 flex-grow">
+                    <div class="quizResult mt-2"></div>
+                    <div class="correctAnswer mt-1 text-gray-500"></div>
+                </div>
+
+                <div class="quiz-question mt-4">
+                    <label>3. What is the place value of 5 in the number 356?</label>
+                    <input type="text" class="quizAnswer border border-gray-400 rounded p-2 mt-2 flex-grow">
+                    <div class="quizResult mt-2"></div>
+                    <div class="correctAnswer mt-1 text-gray-500"></div>
+                </div>
+
+                <div class="quiz-question mt-4">
+                    <label>4. What is an odd number?</label>
+                    <input type="text" class="quizAnswer border border-gray-400 rounded p-2 mt-2 flex-grow">
+                    <div class="quizResult mt-2"></div>
+                    <div class="correctAnswer mt-1 text-gray-500"></div>
+                </div>
+
+                <div class="quiz-question mt-4">
+                    <label>5. What is 10 times 6?</label>
+                    <input type="text" class="quizAnswer border border-gray-400 rounded p-2 mt-2 flex-grow">
+                    <div class="quizResult mt-2"></div>
+                    <div class="correctAnswer mt-1 text-gray-500"></div>
+                </div>
+            </div>
+            <!-- Single Submit Button -->
+            <div class="mt-4 text-center">
+                <button id="submitQuiz" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600">Submit All Answers</button>
+            </div>
+        </div>
+
+        <div class="mt-8 text-center">
+            <a href="{% url 'home' %}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Back to Problems</a>
+        </div>
+    </div>
+
+    <script>
+        let totalCorrectAnswers = 0; // Counter for correct answers
+        const quizAnswers = ['even', '12', '2', 'odd', '60']; // Correct answers
+        const quizQuestions = document.querySelectorAll('.quiz-question');
+    
+        // Visualize Numbers Functionality
+        document.getElementById('visualizeButton').addEventListener('click', function() {
+            const numberInput = document.getElementById('numberInput').value;
+            const numberVisualization = document.getElementById('numberVisualization');
+            const numberDetails = document.getElementById('numberDetails');
+    
+            numberVisualization.innerHTML = ''; // Clear previous visualization
+            numberDetails.innerHTML = ''; // Clear previous details
+    
+            const number = parseInt(numberInput);
+            if (number >= 1 && number <= 1000) {
+                // Create a bar visualization
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.style.width = `${number}px`; // Width based on the number
+                bar.style.height = '20px'; // Fixed height for the bar
+                bar.style.backgroundColor = '#4f46e5'; // Bar color
+                bar.style.marginRight = '5px';
+                numberVisualization.appendChild(bar);
+    
+                // Show details about the number
+                const isEven = number % 2 === 0 ? "even" : "odd";
+                const message = `The number ${number} is ${isEven}.`;
+                numberDetails.innerHTML = `<p>${message}</p>`;
+            } else {
+                numberDetails.innerHTML = `<p class="text-red-600">Please enter a valid number between 1 and 1000.</p>`;
+            }
+        });
+    
+        document.getElementById('readButton').addEventListener('click', function() {
+            const numberInput = document.getElementById('numberInput').value;
+            const number = parseInt(numberInput);
+    
+            if (!isNaN(number) && number >= 1 && number <= 1000) {
+                const isEven = number % 2 === 0;
+                const numberType = isEven ? "even" : "odd";
+    
+                const utterance = new SpeechSynthesisUtterance(`${number} is an ${numberType} number.`);
+                utterance.lang = 'en-US'; // Language of the utterance
+                utterance.volume = 1; // Volume (0 to 1)
+                utterance.rate = 1; // Speed of the speech (0.1 to 10)
+                utterance.pitch = 1; // Pitch of the speech (0 to 2)
+                
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert('Please enter a valid number between 1 and 1000 to read.');
+            }
+        });
+    
+        // Quiz Functionality
+        document.getElementById('submitQuiz').addEventListener('click', function() {
+            totalCorrectAnswers = 0; // Reset score for submission
+            quizQuestions.forEach((question, index) => {
+                const answer = question.querySelector('.quizAnswer').value.toLowerCase();
+                const quizResult = question.querySelector('.quizResult');
+                const correctAnswerDisplay = question.querySelector('.correctAnswer');
+
+                // Show result for the submitted answer
+                if (answer === quizAnswers[index]) {
+                    quizResult.innerHTML = '<p class="text-green-600">Correct!</p>';
+                    totalCorrectAnswers++; // Increment score for correct answer
+                } else {
+                    quizResult.innerHTML = '<p class="text-red-600">Incorrect!</p>';
+                }
+
+                // Show correct answer
+                correctAnswerDisplay.innerHTML = `<strong>Correct Answer:</strong> ${quizAnswers[index]}`;
+            });
+
+            // Submit Score to Server
+            submitScore();
+        });
+
+        // Submit Score to Server
+        function submitScore() {
+            const data = {
+                score: totalCorrectAnswers,
+                totalQuestions: quizAnswers.length
+            };
+    
+            fetch('/submit-score/', { 
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => {
+                if (response.ok) {
+                    alert('Score submitted successfully!');
+                } else {
+                    alert('Failed to submit score.');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        }
+    </script>
+</div>
+
+{% endblock %}

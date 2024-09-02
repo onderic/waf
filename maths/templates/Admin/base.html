@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Admin Dashboard{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.2.1/dist/chart.umd.min.js"></script>
+
+</head>
+<body class="bg-gray-100">
+
+    <!-- Navbar -->
+    <nav class="bg-gray-200 p-4  fixed w-full z-10 top-0">
+        <div class="container mx-auto flex justify-between items-center">
+            <div class="text-lg font-semibold">
+               <a href="/"> Admin Dashboard</a>
+            </div>
+           
+        </div>
+    </nav>
+
+    <!-- Sidebar -->
+    <div class="flex">
+        <div class="w-64 bg-gray-200 h-screen fixed mt-16">
+            <div class="p-6">
+                <div class="text-xl font-semibold mb-4">
+                    Navigation
+                </div>
+                <ul class="space-y-4">
+                    <li>
+                        <a href="{% url 'admin_dashboard' %}" class="hover:bg-blue-500 hover:text-white p-2 block rounded">Dashboard</a>
+                    </li>
+                    <li>
+                        <a href="{% url 'add_math_problem' %}" class="hover:bg-blue-500 hover:text-white p-2 block rounded">Math Problems</a>
+                    </li>
+                    
+                    <li>
+                        <a href="#" class="hover:bg-blue-500 hover:text-white p-2 block rounded">Analytics</a>
+                    </li>
+                    <li>
+                        <a href="#" class="hover:bg-blue-500 hover:text-white p-2 block rounded">Settings</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Content Area -->
+        <div class="flex-1 ml-64 p-8 mt-16">
+            {% block content %}
+            <!-- Page specific content goes here -->
+            {% endblock %}
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <!-- <footer class="bg-gray-200  p-4 fixed bottom-0 w-full">
+        <div class="container mx-auto text-center">
+            &copy; 2024 Your Company Name. All rights reserved.
+        </div>
+    </footer> -->
+
+</body>
+</html>

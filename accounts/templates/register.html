@@ -1,0 +1,98 @@
+{% extends 'base.html' %}
+
+{% block title %}Register{% endblock %}
+{% load static %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center bg-gray-100">
+    <div class="w-full max-w-6xl flex bg-white rounded-lg shadow-lg overflow-hidden">
+        <!-- Left Section: Description -->
+        <div class="w-1/2 bg-blue-500 p-16 text-white flex flex-col justify-center">
+            <h2 class="text-5xl font-bold mb-8">Available Math Problems</h2>
+            <p class="text-lg mb-6">Explore various topics including Number Sense, Basic Operations, Fractions, Measurements, and Time. Strengthen your math skills with engaging exercises and detailed explanations.</p>
+            <ul class="list-disc list-inside text-lg">
+                <li>Understand place values and number comparison</li>
+                <li>Master addition, subtraction, multiplication, and division</li>
+                <li>Learn fractions and their real-world applications</li>
+                <li>Measure length, weight, and capacity accurately</li>
+                <li>Read and interpret both analog and digital clocks</li>
+            </ul>
+        </div>
+        
+        <!-- Right Section: Registration Form -->
+        <div class="w-1/2 p-16 flex items-center justify-center">
+            <div class="w-full max-w-lg">
+                <h1 class="text-3xl font-bold mb-6 text-center text-gray-700">Student Registration</h1>
+                
+                <!-- Display messages -->
+                <div class="mb-4">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="p-4 mb-4 rounded-md text-sm
+                                {% if message.tags == 'success' %} bg-green-100 text-green-800
+                                {% elif message.tags == 'error' %} bg-red-100 text-red-800
+                                {% else %} bg-gray-100 text-gray-800
+                                {% endif %}">
+                                {{ message }}
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+        
+                <form method="post" class="space-y-4">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        <label for="id_email" class="block text-gray-600 font-semibold">Email</label>
+                        <input type="email" name="email" id="id_email" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500" placeholder="Email">
+                        {% if form.email.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ form.email.errors }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_first_name" class="block text-gray-600 font-semibold">First Name</label>
+                        <input type="text" name="first_name" id="id_first_name" value="{{ form.first_name.value }}" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        {% if form.first_name.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ form.first_name.errors }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_last_name" class="block text-gray-600 font-semibold">Last Name</label>
+                        <input type="text" name="last_name" id="id_last_name" value="{{ form.last_name.value }}" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        {% if form.last_name.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ form.last_name.errors }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <input type="hidden" name="user_type" value="student">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_password" class="block text-gray-600 font-semibold">Password</label>
+                        <input type="password" name="password" id="id_password" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        {% if form.password.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ form.password.errors }}</p>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="id_confirm_password" class="block text-gray-600 font-semibold">Confirm Password</label>
+                        <input type="password" name="confirm_password" id="id_confirm_password" class="mt-1 block w-full px-4 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500">
+                        {% if form.confirm_password.errors %}
+                            <p class="text-red-500 text-sm mt-1">{{ form.confirm_password.errors }}</p>
+                        {% endif %}
+                    </div>
+        
+                    <button type="submit" class="w-full bg-blue-500 text-white px-4 py-2 rounded-md shadow hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500">Register</button>
+                </form>
+                <div class="mt-4 text-center">
+                    <a href="{% url 'login' %}" class="text-blue-500 hover:underline">Already have an account? Login</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

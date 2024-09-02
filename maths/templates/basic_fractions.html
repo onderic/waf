@@ -1,0 +1,134 @@
+{% extends 'base.html' %}
+
+{% block title %}Basic Fractions{% endblock %}
+
+{% block content %}
+<div class="bg-gray-100">
+    <div class="container mx-auto mt-6">
+        <h1 class="text-3xl font-bold text-center">Basic Fractions</h1>
+        <p class="text-gray-700 mt-4 text-center">Students will understand fractions as parts of a whole, such as ½, ⅔, and ⅘, while also recognizing and shaping basic fractions using geometric shapes.</p>
+        
+        <!-- Fraction Section -->
+        <div class="mt-8 p-6 bg-white rounded shadow-md">
+            <h2 class="text-xl font-semibold">Understand Fractions</h2>
+            <p class="mt-4">Select a fraction to visualize:</p>
+            <div class="flex mt-4">
+                <button class="fraction-button bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mr-2" data-fraction="1/2">½</button>
+                <button class="fraction-button bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mr-2" data-fraction="2/3">⅔</button>
+                <button class="fraction-button bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600" data-fraction="4/5">⅘</button>
+            </div>
+            <div id="fractionVisualization" class="mt-4 text-blue-600">
+                <!-- Visualization will appear here -->
+            </div>
+        </div>
+
+        <!-- Quiz Section -->
+        <div class="mt-8 p-6 bg-white rounded shadow-md">
+            <h2 class="text-xl font-semibold">Quiz: Identify the Fraction</h2>
+            <div id="quizContainer" class="mt-4">
+                <!-- Quiz questions will be inserted here -->
+            </div>
+            <button id="submitQuizButton" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Submit Answers</button>
+            <div id="quizResult" class="mt-4 text-blue-600"></div>
+        </div>
+
+        <div class="mt-8 text-center">
+            <a href="{% url 'home' %}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Back to Problems</a>
+        </div>
+    </div>
+
+    <script>
+        // Fraction Visualization Functionality
+        document.querySelectorAll('.fraction-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const fraction = this.getAttribute('data-fraction');
+                const fractionVisualization = document.getElementById('fractionVisualization');
+                
+                switch(fraction) {
+                    case '1/2':
+                        fractionVisualization.innerHTML = `<div class="bg-yellow-500 rounded-md w-1/2 h-32 mx-auto"></div><p class="mt-2">This is ½ of a rectangle.</p>`;
+                        break;
+                    case '2/3':
+                        fractionVisualization.innerHTML = `<div class="bg-yellow-500 rounded-md w-2/3 h-32 mx-auto"></div><p class="mt-2">This is ⅔ of a rectangle.</p>`;
+                        break;
+                    case '4/5':
+                        fractionVisualization.innerHTML = `<div class="bg-yellow-500 rounded-md w-4/5 h-32 mx-auto"></div><p class="mt-2">This is ⅘ of a rectangle.</p>`;
+                        break;
+                    default:
+                        fractionVisualization.innerHTML = `<p class="text-red-600">Invalid fraction selected.</p>`;
+                }
+            });
+        });
+
+        // Quiz Functionality
+        const quizQuestions = [
+            { question: "Which fraction represents half of a shape?", options: ["⅓", "½", "¾"], answer: "½" },
+            { question: "Which fraction represents two-thirds of a shape?", options: ["⅔", "⅖", "⅘"], answer: "⅔" },
+            { question: "Which fraction represents four-fifths of a shape?", options: ["⅗", "⅘", "⅛"], answer: "⅘" },
+        ];
+
+        function loadQuiz() {
+            const quizContainer = document.getElementById('quizContainer');
+            quizQuestions.forEach((q, index) => {
+                let optionsHtml = '';
+                q.options.forEach(option => {
+                    optionsHtml += `
+                        <label class="inline-flex items-center mt-2">
+                            <input type="radio" name="question${index}" value="${option}" class="form-radio text-blue-600">
+                            <span class="ml-2">${option}</span>
+                        </label>
+                    `;
+                });
+                quizContainer.innerHTML += `
+                    <div class="mt-2">
+                        <label class="text-gray-700">${q.question}</label>
+                        <div class="mt-2">${optionsHtml}</div>
+                    </div>
+                `;
+            });
+        }
+
+        loadQuiz();
+
+        document.getElementById('submitQuizButton').addEventListener('click', function() {
+            let score = 0;
+            quizQuestions.forEach((q, index) => {
+                const selectedOption = document.querySelector(`input[name="question${index}"]:checked`);
+                if (selectedOption && selectedOption.value === q.answer) {
+                    score++;
+                }
+            });
+            const totalQuestions = quizQuestions.length;
+            const quizResult = document.getElementById('quizResult');
+            quizResult.innerHTML = `<p>You scored ${score} out of ${totalQuestions}.</p>`;
+
+            // Submit score to the server
+            submitScore(score, totalQuestions);
+        });
+
+        function submitScore(score, totalQuestions) {
+            fetch("{% url 'submit_score' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ score: score, totalQuestions: totalQuestions })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Score submitted successfully:', data);
+            })
+            .catch((error) => {
+                console.error('Error submitting score:', error);
+            });
+        }
+    </script>
+</div>
+
+{% endblock %}

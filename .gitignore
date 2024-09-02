@@ -1,0 +1,83 @@
+# Python bytecode files
+*.pyc
+*.pyo
+*.pyd
+__pycache__/
+*.so
+
+# Django stuff:
+*.log
+*.pot
+*.py[cod]
+*.sqlite3
+*.db
+
+# If you're using SQLite database
+db.sqlite3
+
+# If you're using PostgreSQL or other databases, ignore database dumps
+*.dump
+*.sql
+
+# Django migrations
+*/migrations/*
+
+# Media files
+/media/
+
+# Static files
+/staticfiles/
+
+# Local environment variables
+.env
+
+# VS Code specific files
+.vscode/
+
+# JetBrains IDEs (PyCharm, IntelliJ) specific files
+.idea/
+
+# MacOS specific files
+.DS_Store
+
+# Linux specific files
+*.swp
+*.swo
+
+# Node.js dependencies (if you're using npm/yarn)
+node_modules/
+
+# Coverage reports
+htmlcov/
+.coverage
+.tox/
+.coverage.*
+
+# Pytest
+.pytest_cache/
+
+# MyPy
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# PyCharm specific files
+.idea/
+
+# Virtual environment directories
+venv/
+env/
+ENV/
+.env/
+.pip/
+
+# pipenv files
+Pipfile.lock
+
+# If you're using Docker:
+docker-compose.yml
+*.env
+Dockerfile
+
+# Any secrets
+secrets.json

@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Home - Student{% endblock %}</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <style>
+        html, body {
+            height: 100%;
+        }
+        .wrapper {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .content {
+            flex: 1;
+        }
+    </style>
+</head>
+<body class="bg-gray-100">
+
+<div class="wrapper">
+    <!-- Navbar -->
+    <nav class="bg-white text-gray-500 font-serif  p-4">
+        <div class="container mx-auto flex justify-between items-center">
+            <a href="/" class="text-2xl font-bold">MATH PROBLEMS - PRIMARY SCHOOL</a>
+            <div>
+                <a href="/" class="px-4 py-2 rounded hover:bg-blue-700 hover:text-white">Home</a>
+                <a href="{% url 'problems' %}" class="px-4 py-2 rounded hover:bg-blue-700 hover:text-white">Problems</a>
+                {% if user.is_authenticated %}
+                    <!-- <a href="#" class="px-4 py-2 rounded hover:bg-blue-700 hover:text-white">Dashboard</a> -->
+                    <a href="{% url 'logout' %}" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Logout</a>
+                {% else %}
+                    <a href="{% url 'login' %}" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Login</a>
+                {% endif %}
+            </div>
+        </div>
+    </nav>
+
+    <div class="content container mx-auto mt-6">
+        {% block content %}
+
+        {% endblock %}
+    </div>
+</div>
+
+<!-- Footer -->
+<footer class="bg-gray-400 text-white py-4">
+    <div class="container mx-auto text-center">
+        <p>&copy; 2024 Student. All rights reserved.</p>
+        <p>
+            <a href="#" class="hover:underline">Privacy Policy</a> | 
+            <a href="#" class="hover:underline">Terms of Service</a>
+        </p>
+    </div>
+</footer>
+
+</body>
+</html>

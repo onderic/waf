@@ -1,0 +1,153 @@
+{% extends 'base.html' %}
+
+{% block title %}Basic Operations{% endblock %}
+
+{% block content %}
+<div class="bg-gray-100">
+    <div class="container mx-auto mt-6">
+        <h1 class="text-3xl font-bold text-center">Basic Operations</h1>
+        <p class="text-gray-700 mt-4 text-center">Students will learn addition and subtraction within 1,000, viewing multiplication as repeated addition and understanding division as sharing or grouping.</p>
+        
+        <!-- Operations Section -->
+        <div class="mt-8 p-6 bg-white rounded shadow-md">
+            <h2 class="text-xl font-semibold">Perform Operations</h2>
+            <div class="mt-4">
+                <label for="firstNumber" class="text-gray-700">Enter the first number:</label>
+                <input type="number" id="firstNumber" class="border border-gray-400 rounded p-2 flex-grow mt-2" min="0" max="1000">
+            </div>
+            <div class="mt-4">
+                <label for="secondNumber" class="text-gray-700">Enter the second number:</label>
+                <input type="number" id="secondNumber" class="border border-gray-400 rounded p-2 flex-grow mt-2" min="0" max="1000">
+            </div>
+            <div class="flex items-center mt-4">
+                <button id="addButton" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Add</button>
+                <button id="subtractButton" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 ml-2">Subtract</button>
+                <button id="readResultButton" class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 ml-2">Read Result</button>
+            </div>
+            <div id="operationResult" class="mt-4 text-blue-600"></div>
+        </div>
+
+        <!-- Quiz Section -->
+        <div class="mt-8 p-6 bg-white rounded shadow-md">
+            <h2 class="text-xl font-semibold">Quiz: Solve the Problems</h2>
+            <div id="quizContainer" class="mt-4">
+                <!-- Quiz questions will be inserted here -->
+            </div>
+            <button id="submitQuizButton" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Submit Answers</button>
+            <div id="quizResult" class="mt-4 text-blue-600"></div>
+        </div>
+
+        <div class="mt-8 text-center">
+            <a href="{% url 'home' %}" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Back to Problems</a>
+        </div>
+    </div>
+
+    <script>
+        // Operations Functionality
+        document.getElementById('addButton').addEventListener('click', function() {
+            const firstNumber = parseInt(document.getElementById('firstNumber').value);
+            const secondNumber = parseInt(document.getElementById('secondNumber').value);
+            const operationResult = document.getElementById('operationResult');
+    
+            if (!isNaN(firstNumber) && !isNaN(secondNumber)) {
+                const result = firstNumber + secondNumber;
+                operationResult.innerHTML = `<p>The result of ${firstNumber} + ${secondNumber} is ${result}.</p>`;
+            } else {
+                operationResult.innerHTML = `<p class="text-red-600">Please enter valid numbers.</p>`;
+            }
+        });
+    
+        document.getElementById('subtractButton').addEventListener('click', function() {
+            const firstNumber = parseInt(document.getElementById('firstNumber').value);
+            const secondNumber = parseInt(document.getElementById('secondNumber').value);
+            const operationResult = document.getElementById('operationResult');
+    
+            if (!isNaN(firstNumber) && !isNaN(secondNumber)) {
+                const result = firstNumber - secondNumber;
+                operationResult.innerHTML = `<p>The result of ${firstNumber} - ${secondNumber} is ${result}.</p>`;
+            } else {
+                operationResult.innerHTML = `<p class="text-red-600">Please enter valid numbers.</p>`;
+            }
+        });
+
+        document.getElementById('readResultButton').addEventListener('click', function() {
+            const resultText = document.getElementById('operationResult').innerText;
+
+            if (resultText) {
+                const utterance = new SpeechSynthesisUtterance(resultText);
+                utterance.lang = 'en-US'; // Language of the utterance
+                utterance.volume = 1; // Volume (0 to 1)
+                utterance.rate = 1; // Speed of the speech (0.1 to 10)
+                utterance.pitch = 1; // Pitch of the speech (0 to 2)
+                
+                window.speechSynthesis.speak(utterance);
+            } else {
+                alert('Please perform an operation first to read the result.');
+            }
+        });
+
+        // Quiz Functionality
+        const quizQuestions = [
+            { question: "What is 25 + 30?", answer: 55 },
+            { question: "What is 100 - 45?", answer: 55 },
+            { question: "What is 200 + 150?", answer: 350 },
+            { question: "What is 90 - 50?", answer: 40 },
+            { question: "What is 75 + 25?", answer: 100 },
+        ];
+
+        function loadQuiz() {
+            const quizContainer = document.getElementById('quizContainer');
+            quizQuestions.forEach((q, index) => {
+                quizContainer.innerHTML += `
+                    <div class="mt-2">
+                        <label class="text-gray-700">${q.question}</label>
+                        <input type="number" class="border border-gray-400 rounded p-2 mt-2" data-answer="${q.answer}" id="answer${index}" min="0">
+                    </div>
+                `;
+            });
+        }
+
+        loadQuiz();
+
+        document.getElementById('submitQuizButton').addEventListener('click', function() {
+            let score = 0;
+            quizQuestions.forEach((q, index) => {
+                const userAnswer = parseInt(document.getElementById(`answer${index}`).value);
+                if (!isNaN(userAnswer) && userAnswer === q.answer) {
+                    score++;
+                }
+            });
+            const totalQuestions = quizQuestions.length;
+            const quizResult = document.getElementById('quizResult');
+            quizResult.innerHTML = `<p>You scored ${score} out of ${totalQuestions}.</p>`;
+
+            // Submit score to the server
+            submitScore(score, totalQuestions);
+        });
+
+        function submitScore(score, totalQuestions) {
+            fetch("{% url 'submit_score' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ score: score, totalQuestions: totalQuestions })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Score submitted successfully:', data);
+            })
+            .catch((error) => {
+                console.error('Error submitting score:', error);
+            });
+        }
+    </script>
+</div>
+
+{% endblock %}

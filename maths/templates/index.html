@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block title %}Home{% endblock %}
+{% load static %}
+
+{% block content %}
+
+    <!-- Main Content with Gap -->
+    <div class="py-48 mx-auto max-w-7xl px-4 md:px-12 lg:px-6 xl:px-0 lg:mb-20 mb-10">
+        <div class="container mx-auto">
+            <div class="-mx-4 flex flex-wrap items-center">
+                <div class="w-full px-4 lg:w-1/2">
+                    <div class="mb-12 lg:mb-0">
+                        <h2 class="mb-5 text-5xl font-bold leading-[1.208] text-dark dark:text-white font-serif ">
+                            Learn Math the Fun Way!
+                        </h2>
+                        <p class="dark:text-dark-6 mb-8 max-w-[485px] text-2xl text-gray-600">
+                            Welcome to our interactive learning platform! Here, you can explore basic math concepts like addition, subtraction, time-telling, and fractions through fun activities and games. Let's make learning enjoyable and engaging for everyone!
+                        </p>
+                      
+                        <a href="{% url 'problems' %}" class="mb-3 rounded-md bg-purple-600  px-7 py-3 text-base font-medium text-white transition">
+                            Discover Now
+                        </a>
+                    </div>
+                </div>
+                <div class="w-full px-4 lg:w-1/2">
+                    <div class="-mx-2 flex flex-wrap sm:-mx-4">
+                        <div class="w-1/2 px-2 sm:px-4">
+                            <div class="mb-4 h-full sm:mb-8 sm:h-[442px] ">
+                                <img src="{% static 'imgs/1.webp' %}" alt="hero image" class="h-full w-full object-cover object-center">
+                            </div>
+                        </div>
+                        <div class="w-1/2 px-2 sm:px-4">
+                            <div class="mb-4 h-[120px] sm:mb-8 sm:h-[205px] lg:h-[150px] xl:h-[205px]">
+                                <img src="{% static 'imgs/2.jpg' %}" alt="hero image" class="h-full w-full object-cover object-center">
+                            </div>
+                            <div class="mb-4 h-[120px] sm:mb-8 sm:h-[205px] lg:h-[150px] xl:h-[205px]">
+                                <img src="{% static 'imgs/3.jpg' %}" alt="hero image" class="h-full w-full object-cover object-center">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+{% endblock %}

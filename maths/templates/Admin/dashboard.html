@@ -1,0 +1,84 @@
+{% extends 'Admin/base.html' %}
+
+{% block title %}Analytics Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mx-auto">
+    <h1 class="text-3xl font-semibold mb-6">Analytics Overview</h1>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <!-- Total Users Card -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-2">Total Users</h2>
+            <p class="text-gray-600 text-3xl">{{ total_users }}</p>
+        </div>
+
+        <!-- Active Users Card -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-2">Active Users</h2>
+            <p class="text-gray-600 text-3xl">{{ active_users }}</p>
+        </div>
+
+        <!-- Total Problems Solved Card -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-2">Total Problems Solved</h2>
+            <p class="text-gray-600 text-3xl">{{ total_problems_solved }}</p>
+        </div>
+
+        <!-- Average Score Card -->
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <h2 class="text-xl font-semibold mb-2">Average Score</h2>
+            <p class="text-gray-600 text-3xl">{{ average_score }}%</p>
+        </div>
+    </div>
+
+    <!-- Chart Section -->
+    <div class="mt-12">
+        <h2 class="text-2xl font-semibold mb-4">Problems Solved Over The Week</h2>
+        <div class="bg-white p-6 rounded-lg shadow-md">
+            <canvas id="userActivityChart" width="300" height="100"></canvas>
+        </div>
+    </div>
+</div>
+
+{% block extra_scripts %}
+<!-- Chart.js Library -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- Script for Rendering the Chart -->
+<script>
+    document.addEventListener("DOMContentLoaded", function() {
+        let ctx = document.getElementById("userActivityChart").getContext("2d");
+
+        let chart = new Chart(ctx, {
+            type: "bar",
+            data: {
+                labels: {{ chart_labels|safe }},  // Use dynamic labels
+                datasets: [
+                    {
+                        label: "Problems Solved",
+                        backgroundColor: "#79AEC8",
+                        borderColor: "#417690",
+                        data: {{ chart_data|safe }}, 
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: true
+                    },
+                    title: {
+                        display: true,
+                        text: "User Activity Over Last 7 Days"
+                    }
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}
+{% endblock %}

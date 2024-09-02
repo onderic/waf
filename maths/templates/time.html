@@ -1,0 +1,140 @@
+{% extends 'base.html' %}
+
+{% block title %}Time{% endblock %}
+
+{% block content %}
+<div class="bg-gray-100">
+    <div class="container mx-auto mt-6">
+        <h1 class="text-3xl font-bold text-center">Time</h1>
+        <p class="text-gray-700 mt-4 text-center">The ability to read and interpret both analog and digital clocks is important, as is telling time to the nearest hour, half-hour, and quarter-hour.</p>
+        
+        <!-- Time Section -->
+        <div class="mt-8 p-6 bg-white rounded shadow-md">
+            <h2 class="text-xl font-semibold">Learn to Tell Time</h2>
+            <p class="mt-4">Select a clock type to visualize:</p>
+            <div class="flex mt-4">
+                <button class="time-button bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 mr-2" data-time="analog">Analog Clock</button>
+                <button class="time-button bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600 mr-2" data-time="digital">Digital Clock</button>
+            </div>
+            <div id="timeVisualization" class="mt-4 text-purple-600">
+                <!-- Visualization will appear here -->
+            </div>
+        </div>
+
+        <!-- Quiz Section -->
+        <div class="mt-8 p-6 bg-white rounded shadow-md">
+            <h2 class="text-xl font-semibold">Quiz: Tell the Time</h2>
+            <div id="quizContainer" class="mt-4">
+                <!-- Quiz questions will be inserted here -->
+            </div>
+            <button id="submitQuizButton" class="mt-4 bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">Submit Answers</button>
+            <div id="quizResult" class="mt-4 text-purple-600"></div>
+        </div>
+
+        <div class="mt-8 text-center">
+            <a href="{% url 'home' %}" class="bg-purple-500 text-white px-4 py-2 rounded hover:bg-purple-600">Back to Problems</a>
+        </div>
+    </div>
+
+    <script>
+        // Time Visualization Functionality
+        document.querySelectorAll('.time-button').forEach(button => {
+            button.addEventListener('click', function() {
+                const timeType = this.getAttribute('data-time');
+                const timeVisualization = document.getElementById('timeVisualization');
+                
+                switch(timeType) {
+                    case 'analog':
+                        timeVisualization.innerHTML = `<svg class="mx-auto" width="200" height="200" viewBox="0 0 200 200">
+                            <circle cx="100" cy="100" r="90" fill="white" stroke="black" stroke-width="5"/>
+                            <line x1="100" y1="100" x2="100" y2="40" stroke="black" stroke-width="5" stroke-linecap="round" id="hourHand" />
+                            <line x1="100" y1="100" x2="140" y2="100" stroke="black" stroke-width="3" stroke-linecap="round" id="minuteHand" />
+                            <line x1="100" y1="100" x2="130" y2="80" stroke="red" stroke-width="2" stroke-linecap="round" id="secondHand" />
+                            <text x="100" y="20" font-size="16" text-anchor="middle">12</text>
+                            <text x="10" y="105" font-size="16" text-anchor="middle">9</text>
+                            <text x="100" y="195" font-size="16" text-anchor="middle">6</text>
+                            <text x="190" y="105" font-size="16" text-anchor="middle">3</text>
+                        </svg>
+                        <p class="mt-2">This is an analog clock showing 10:00.</p>`;
+                        break;
+                    case 'digital':
+                        timeVisualization.innerHTML = `<div class="text-5xl font-bold">10:00</div><p class="mt-2">This is a digital clock showing 10:00.</p>`;
+                        break;
+                    default:
+                        timeVisualization.innerHTML = `<p class="text-red-600">Invalid clock type selected.</p>`;
+                }
+            });
+        });
+
+        // Quiz Functionality
+        const quizQuestions = [
+            { question: "What time is shown on the analog clock?", options: ["10:00", "2:00", "12:00"], answer: "10:00" },
+            { question: "What time is represented as 14:30 in the 12-hour format?", options: ["2:30 PM", "2:30 AM", "12:30 PM"], answer: "2:30 PM" },
+            { question: "What is a quarter past 3?", options: ["3:15", "3:30", "3:45"], answer: "3:15" },
+        ];
+
+        function loadQuiz() {
+            const quizContainer = document.getElementById('quizContainer');
+            quizQuestions.forEach((q, index) => {
+                let optionsHtml = '';
+                q.options.forEach(option => {
+                    optionsHtml += `
+                        <label class="inline-flex items-center mt-2">
+                            <input type="radio" name="question${index}" value="${option}" class="form-radio text-purple-600">
+                            <span class="ml-2">${option}</span>
+                        </label>
+                    `;
+                });
+                quizContainer.innerHTML += `
+                    <div class="mt-2">
+                        <label class="text-gray-700">${q.question}</label>
+                        <div class="mt-2">${optionsHtml}</div>
+                    </div>
+                `;
+            });
+        }
+
+        loadQuiz();
+
+        document.getElementById('submitQuizButton').addEventListener('click', function() {
+            let score = 0;
+            quizQuestions.forEach((q, index) => {
+                const selectedOption = document.querySelector(`input[name="question${index}"]:checked`);
+                if (selectedOption && selectedOption.value === q.answer) {
+                    score++;
+                }
+            });
+            const totalQuestions = quizQuestions.length;
+            const quizResult = document.getElementById('quizResult');
+            quizResult.innerHTML = `<p>You scored ${score} out of ${totalQuestions}.</p>`;
+
+            // Submit score to the server
+            submitScore(score, totalQuestions);
+        });
+
+        function submitScore(score, totalQuestions) {
+            fetch("{% url 'submit_score' %}", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}'
+                },
+                body: JSON.stringify({ score: score, totalQuestions: totalQuestions })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log('Score submitted successfully:', data);
+            })
+            .catch((error) => {
+                console.error('Error submitting score:', error);
+            });
+        }
+    </script>
+</div>
+
+{% endblock %}
