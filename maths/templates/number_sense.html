@@ -86,17 +86,17 @@
             const numberVisualization = document.getElementById('numberVisualization');
             const numberDetails = document.getElementById('numberDetails');
     
-            numberVisualization.innerHTML = ''; // Clear previous visualization
-            numberDetails.innerHTML = ''; // Clear previous details
+            numberVisualization.innerHTML = ''; 
+            numberDetails.innerHTML = ''; 
     
             const number = parseInt(numberInput);
             if (number >= 1 && number <= 1000) {
                 // Create a bar visualization
                 const bar = document.createElement('div');
                 bar.className = 'bar';
-                bar.style.width = `${number}px`; // Width based on the number
-                bar.style.height = '20px'; // Fixed height for the bar
-                bar.style.backgroundColor = '#4f46e5'; // Bar color
+                bar.style.width = `${number}px`; 
+                bar.style.height = '20px'; 
+                bar.style.backgroundColor = '#4f46e5';
                 bar.style.marginRight = '5px';
                 numberVisualization.appendChild(bar);
     
@@ -118,10 +118,10 @@
                 const numberType = isEven ? "even" : "odd";
     
                 const utterance = new SpeechSynthesisUtterance(`${number} is an ${numberType} number.`);
-                utterance.lang = 'en-US'; // Language of the utterance
-                utterance.volume = 1; // Volume (0 to 1)
-                utterance.rate = 1; // Speed of the speech (0.1 to 10)
-                utterance.pitch = 1; // Pitch of the speech (0 to 2)
+                utterance.lang = 'en-US'; 
+                utterance.volume = 1;
+                utterance.rate = 1;
+                utterance.pitch = 1; 
                 
                 window.speechSynthesis.speak(utterance);
             } else {
@@ -131,7 +131,7 @@
     
         // Quiz Functionality
         document.getElementById('submitQuiz').addEventListener('click', function() {
-            totalCorrectAnswers = 0; // Reset score for submission
+            totalCorrectAnswers = 0; 
             quizQuestions.forEach((question, index) => {
                 const answer = question.querySelector('.quizAnswer').value.toLowerCase();
                 const quizResult = question.querySelector('.quizResult');
@@ -140,24 +140,26 @@
                 // Show result for the submitted answer
                 if (answer === quizAnswers[index]) {
                     quizResult.innerHTML = '<p class="text-green-600">Correct!</p>';
-                    totalCorrectAnswers++; // Increment score for correct answer
+                    totalCorrectAnswers++;
                 } else {
                     quizResult.innerHTML = '<p class="text-red-600">Incorrect!</p>';
                 }
 
-                // Show correct answer
+              
                 correctAnswerDisplay.innerHTML = `<strong>Correct Answer:</strong> ${quizAnswers[index]}`;
             });
 
-            // Submit Score to Server
+            
             submitScore();
         });
 
-        // Submit Score to Server
+        
         function submitScore() {
+              const slug = 'number-sense'
             const data = {
                 score: totalCorrectAnswers,
-                totalQuestions: quizAnswers.length
+                totalQuestions: quizAnswers.length,
+                slug: slug
             };
     
             fetch('/submit-score/', { 

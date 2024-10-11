@@ -40,20 +40,31 @@ def math_problem_detail(request, slug):
 def detail_view(request):
     return render()
 
+@login_required
 @csrf_exempt
 def submit_score(request):
     if request.method == 'POST':
         data = json.loads(request.body)
         score = data.get('score')
         total_questions = data.get('totalQuestions')
+        math_problem_slug = data.get('slug')  
         
-        # Save the score to the database
-        QuizScore.objects.create(score=score, total_questions=total_questions)
+        try:
+            math_problem = MathProblem.objects.get(slug=math_problem_slug)
+        
+            QuizScore.objects.create(
+                student=request.user,
+                score=score,
+                total_questions=total_questions,
+                math_problem=math_problem  
+            )
 
-        return JsonResponse({'status': 'success'}, status=201)
+            return JsonResponse({'status': 'success'}, status=201)
+
+        except MathProblem.DoesNotExist:
+            return JsonResponse({'error': 'Math problem not found'}, status=404)
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
-
 
 def admin_dashboard(request):
     total_users = User.objects.count()  
@@ -130,5 +141,21 @@ def delete_math_problem(request, pk):
 
 
 def view_analytics(request):
-    # Display analytics, like the number of problems added, topics covered, etc.
+    
     return render(request, 'view_analytics.html')
+
+
+@login_required
+def student_scores(request):
+    # Retrieve all quiz scores for the logged-in student
+    scores = QuizScore.objects.filter(student=request.user)
+
+    # Get the current student's details
+    student = request.user
+
+    # Pass the scores and student info to the template
+    context = {
+        'scores': scores,
+        'student': student
+    }
+    return render(request, 'records.html', context)

@@ -107,13 +107,14 @@
         });
 
         function submitScore(score, totalQuestions) {
+            const slug = "basic-fractions"; 
             fetch("{% url 'submit_score' %}", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                     'X-CSRFToken': '{{ csrf_token }}'
                 },
-                body: JSON.stringify({ score: score, totalQuestions: totalQuestions })
+                body: JSON.stringify({ score: score, totalQuestions: totalQuestions,slug: slug   })
             })
             .then(response => {
                 if (!response.ok) {

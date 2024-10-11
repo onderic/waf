@@ -13,4 +13,5 @@ urlpatterns = [
     path('problem/<slug:slug>/', views.math_problem_detail, name='math_problem_detail'),
     path('submit-score/', views.submit_score, name='submit_score'),
     path('problems/', views.problems, name='problems'),
+    path('records/', views.student_scores, name='records'),
 ]

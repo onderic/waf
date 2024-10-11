@@ -7,7 +7,7 @@
 *.db
 
 # If you're using SQLite database
-db.sqlite3
+# db.sqlite3
 
 
 # Local environment variables

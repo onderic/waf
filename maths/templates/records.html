@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+
+{% block title %}Number Sense{% endblock %}
+
+{% block content %}
+
+ <div>
+    <style>
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        th {
+            background-color: #f2f2f2;
+        }
+    </style>
+    <h1>Your Quiz Scores</h1>
+
+    <h3>Quiz Scores</h3>
+    
+    {% if scores %}
+        <table>
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Student Email</th>
+                    <th>Score</th>
+                    <th>Total Questions</th>
+                    <th>Math Problem</th>
+                    <th>Submitted At</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for score in scores %}
+                    <tr>
+                        <td>{{ student.first_name }} {{ student.last_name }}</td>
+                        <td>{{ student.email }}</td>
+                        <td>{{ score.score }}</td>
+                        <td>{{ score.total_questions }}</td>
+                        <td>{{ score.math_problem }}</td> 
+                        <td>{{ score.submitted_at }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% else %}
+        <p>No quiz scores found.</p>
+    {% endif %}
+ </div>
+
+ {% endblock %}
