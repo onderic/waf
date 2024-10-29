@@ -1,5 +1,6 @@
 from django.urls import path, include
 from . import views
+from .views import PaymentView
 
 urlpatterns = [
     path('', views.index, name='home'),
@@ -14,4 +15,7 @@ urlpatterns = [
     path('submit-score/', views.submit_score, name='submit_score'),
     path('problems/', views.problems, name='problems'),
     path('records/', views.student_scores, name='records'),
+    path('pricing/', views.pricing, name='pricing'),
+    path('payment/<str:plan>/<int:amount>/', PaymentView.as_view(), name='payment_page'),
+    path('daraja', views.payment_page, name='daraja'),
 ]

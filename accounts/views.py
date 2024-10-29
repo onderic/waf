@@ -5,6 +5,8 @@ from django.contrib import messages
 from .forms import LoginForm, SignUpForm
 from .models import User
 from django.contrib.auth import logout
+from maths.models import Subscription
+from django.db import transaction
 
 
 
@@ -18,14 +20,22 @@ def register_view(request):
             user_type = form.cleaned_data['user_type']
             password = form.cleaned_data['password']
             
-            # Create the user
-            user = User.objects.create_user(
-                email=email,
-                first_name=first_name,
-                last_name=last_name,
-                user_type=user_type,
-                password=password
-            )
+            with transaction.atomic():
+                # Create the user
+                user = User.objects.create_user(
+                    email=email,
+                    first_name=first_name,
+                    last_name=last_name,
+                    user_type=user_type,
+                    password=password
+                )
+
+                Subscription.objects.create(
+                    user=user,
+                    plan='', 
+                    amount=None, 
+                    is_active=False 
+                )
             
             messages.success(request, 'Registration successful. Please log in.')
             return redirect('login')
@@ -35,7 +45,6 @@ def register_view(request):
         form = SignUpForm()
     
     return render(request, 'register.html', {'form': form})
-
 
 
 def login_view(request):

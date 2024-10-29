@@ -1,7 +1,8 @@
 
 from django.shortcuts import render, redirect,get_object_or_404
 
-from maths.models import MathProblem, QuizScore
+from maths.models import MathProblem, Mpesa, QuizScore,Subscription
+from maths.mpesa import LipaNaMpesa
 from .forms import MathProblemForm
 from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_exempt
@@ -12,6 +13,8 @@ from datetime import timedelta
 from accounts.models import User
 from django.db.models.functions import TruncDate
 from django.contrib.auth.decorators import login_required
+from django.views import View
+from django.utils.decorators import method_decorator
 
 # Create your views here.
 
@@ -19,12 +22,18 @@ from django.contrib.auth.decorators import login_required
 def index(request):
     return render(request, 'index.html',)
 
-@login_required
+
 def problems(request):
     problems = MathProblem.objects.all()
     return render(request, 'tasks.html',{'problems': problems})
 
+@login_required
 def math_problem_detail(request, slug):
+    
+    active_sub = Subscription.objects.filter(user=request.user, is_active=True).first()
+    if not active_sub:
+        return redirect("pricing")
+    
     problem = get_object_or_404(MathProblem, slug=slug)
     template_mapping = {
         'number-sense': 'number_sense.html',
@@ -84,7 +93,7 @@ def admin_dashboard(request):
         .annotate(day=TruncDate('submitted_at')) 
         .values('day')
         .annotate(count=Count('id'))
-        .order_by('day')
+        .subscription_by('day')
     )
     chart_labels = ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']
     counts = [0] * 7 
@@ -147,15 +156,75 @@ def view_analytics(request):
 
 @login_required
 def student_scores(request):
-    # Retrieve all quiz scores for the logged-in student
     scores = QuizScore.objects.filter(student=request.user)
 
     # Get the current student's details
     student = request.user
-
-    # Pass the scores and student info to the template
     context = {
         'scores': scores,
         'student': student
     }
     return render(request, 'records.html', context)
+
+def pricing(request):
+    return render(request, 'pricing.html')
+
+
+@method_decorator(login_required, name='dispatch') 
+class PaymentView(View):
+    def get(self, request, plan, amount):
+        # Pass the plan and amount to the template context
+        context = {
+            'plan': plan,
+            'amount': amount,
+        }
+        return render(request, 'payment.html', context)
+
+
+
+@login_required
+def payment_page(request):
+    user = request.user
+    subscription = get_object_or_404(Subscription, user=user) 
+    
+    if request.method == 'POST':
+        data = json.loads(request.body) 
+        phone_number = data.get('phone_number')
+        amount = data.get('amount')  
+
+        # Validate phone number length and prefix
+        if not (len(phone_number) == 10 and (phone_number.startswith("07") or phone_number.startswith("01"))):
+            return JsonResponse({'success': False, 'message': 'Invalid phone number. It must be 10 digits long and start with 07 or 01.'})
+
+        if phone_number.startswith("07"):
+            phone_number = "254" + phone_number[2:]  
+        elif phone_number.startswith("01"):
+            phone_number = "254" + phone_number[2:]  
+        
+        lipa_na_mpesa = LipaNaMpesa()
+    
+        payload = {
+            'amount': amount,
+            'phone_number': phone_number,
+            'subscription': subscription.id,
+        }
+        print("payload details", payload)
+        
+        response = lipa_na_mpesa.stk_push(payload)
+        
+        if response.get('ResponseCode') == '0': 
+            checkout_request_id = response.get('CheckoutRequestID')
+
+            Mpesa.objects.create(
+                subscription=subscription,
+                is_processed=False
+            )
+            
+            request.session['subscription_id'] = subscription.id
+            request.session['checkout_request_id'] = checkout_request_id
+
+            return JsonResponse({'success': True, 'checkout_request_id': checkout_request_id})
+        else:
+            return JsonResponse({'success': False, 'message': 'Payment initiation failed. Please try again.'})
+
+    return render(request, 'payment.html', {'subscription': subscription})

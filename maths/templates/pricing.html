@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+
+{% block title %}Number Sense{% endblock %}
+
+{% block content %}
+<div class="wrapper">
+    <!-- Pricing Section -->
+    <div class="content">
+        <section class="py-12 bg-white">
+            <div class="container mx-auto px-4">
+                <h2 class="text-4xl font-bold text-center mb-8 text-gray-800">Pricing Plans</h2>
+                <p class="text-center text-gray-600 mb-8">Choose the best plan to unlock courses and enhance your learning journey!</p>
+                <div class="flex flex-col md:flex-row justify-center items-center gap-8">
+                    <!-- Basic Plan -->
+                    <div class="max-w-xs w-full border border-gray-200 rounded-lg shadow-sm p-6 text-center bg-gray-50">
+                        <h3 class="text-2xl font-semibold text-gray-700">Basic</h3>
+                        <p class="mt-4 text-gray-700">KES10 <span class="text-sm text-gray-500">/ month</span></p>
+                        <ul class="mt-4 space-y-2 text-gray-600">
+                            <li>Access to 5 introductory courses designed to help you get started on your learning journey.</li>
+                            <li>Basic email support for any questions or technical issues you may encounter.</li>
+                            <li>No certification included. Best for those who are exploring and building foundational skills.</li>
+                        </ul>
+                        <div class="mt-6 w-full">
+                            <a href="{% url 'payment_page' plan='basic' amount=10 %}" class="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Choose Basic</a>
+                        </div>
+                    </div>
+                    <!-- Standard Plan -->
+                    <div class="max-w-xs w-full border border-gray-200 rounded-lg shadow-sm p-6 text-center bg-gray-50 transform scale-105">
+                        <h3 class="text-2xl font-semibold text-gray-700">Standard</h3>
+                        <p class="mt-4 text-gray-700">KES30 <span class="text-sm text-gray-500">/ month</span></p>
+                        <ul class="mt-4 space-y-2 text-gray-600">
+                            <li>Access to 20 courses, including intermediate and advanced topics to enhance your skills.</li>
+                            <li>Priority email support, ensuring quick assistance for your learning queries.</li>
+                            <li>Receive certificates upon completion of courses, showcasing your achievements.</li>
+                            <li>This plan is perfect for learners who want a comprehensive approach and recognition for their progress.</li>
+                        </ul>
+                        <div class="mt-6 w-full">
+                        <a href="{% url 'payment_page' plan='standard' amount=30 %}" class="mt-6 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Choose Standard</a>
+                    </div> 
+                    </div>
+                    <!-- Premium Plan -->
+                    <div class="max-w-xs w-full border border-gray-200 rounded-lg shadow-sm p-6 text-center bg-gray-50">
+                        <h3 class="text-2xl font-semibold text-gray-700">Premium</h3>
+                        <p class="mt-4 text-gray-700">KES60 <span class="text-sm text-gray-500">/ month</span></p>
+                        <ul class="mt-4 space-y-2 text-gray-600">
+                            <li>Unlimited access to all courses, including expert-level topics for complete mastery.</li>
+                            <li>24/7 dedicated support, available any time for immediate help and advice.</li>
+                            <li>Earn certificates and special badges that reflect your dedication and expertise.</li>
+                            <li>Ideal for committed learners seeking a comprehensive, in-depth, and personalized learning experience.</li>
+                        </ul>
+                        <div class="mt-6 w-full">
+                        <a href="{% url 'payment_page' plan='premium' amount=60 %}" class="mt-6 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600">Choose Premium</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+ 
+</div>
+{% endblock %}
+

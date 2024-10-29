@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+
+{% block title %}Payment Page{% endblock %}
+
+{% block content %}
+<div class="flex items-center justify-center min-h-screen bg-gray-100">
+    <section class="py-12 bg-white rounded-lg shadow-md w-full max-w-lg">
+        <div class="container mx-auto px-4">
+            <h2 class="text-4xl font-bold text-center mb-8 text-gray-800">Payment for {{ plan|title }} Plan</h2>
+            <p class="text-center text-gray-600 mb-8">You are about to pay KES {{ amount }} for the {{ plan|title }} plan.</p>
+            
+            <!-- Payment Form -->
+            <form id="payment-form" class="max-w-md mx-auto">
+                {% csrf_token %}
+                <input type="hidden" name="plan" value="{{ plan }}">
+                <input type="hidden" name="amount" value="{{ amount }}">
+
+                <div class="mb-4">
+                    <label for="phone_number" class="block text-sm font-medium text-gray-700">Phone Number</label>
+                    <input type="text" id="phone_number" name="phone_number" required class="mt-1 block w-full border border-gray-300 rounded-md shadow-sm p-2" placeholder="e.g., 0712345678">
+                </div>
+
+                <button type="button" id="pay-button" class="mt-6 bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600 flex items-center justify-center">
+                    <span id="button-text">Pay KES {{ amount }}</span>
+                    <div id="loader" class="hidden spinner-border border-2 border-t-2 border-white rounded-full w-6 h-6 ml-2">;;</div>
+                </button>
+            </form>
+        </div>
+    </section>
+</div>
+
+<style>
+    /* CSS for Loader */
+    .spinner-border {
+        animation: spin 0.6s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+</style>
+
+<script>
+document.getElementById('pay-button').addEventListener('click', function() {
+    // Gather data from the form
+    const plan = document.querySelector('input[name="plan"]').value;
+    const amount = document.querySelector('input[name="amount"]').value;
+    const phoneNumber = document.getElementById('phone_number').value;
+
+    // Prepare data to send to the server
+    const data = {
+        plan: plan,
+        amount: amount,
+        phone_number: phoneNumber,
+    };
+
+    // Show loader and hide button text
+    const loader = document.getElementById('loader');
+    const buttonText = document.getElementById('button-text');
+    loader.classList.remove('hidden');
+    buttonText.classList.add('hidden');
+
+    fetch("{% url 'daraja' %}", {  
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRFToken': '{{ csrf_token }}', 
+        },
+        body: JSON.stringify(data),
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Hide loader and show button text
+        loader.classList.add('hidden');
+        buttonText.classList.remove('hidden');
+
+        if (data.success) {
+            alert('Payment successful!'); 
+            // Optionally redirect or show confirmation
+        } else {
+            alert('Payment failed: ' + data.message);
+        }
+    })
+    .catch((error) => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.'); 
+        // Hide loader and show button text on error
+        loader.classList.add('hidden');
+        buttonText.classList.remove('hidden');
+    });
+});
+</script>
+{% endblock %}
