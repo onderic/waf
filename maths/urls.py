@@ -18,4 +18,6 @@ urlpatterns = [
     path('pricing/', views.pricing, name='pricing'),
     path('payment/<str:plan>/<int:amount>/', PaymentView.as_view(), name='payment_page'),
     path('daraja', views.payment_page, name='daraja'),
+    path('mpesa_callback/', views.mpesa_callback, name='mpesa_callback'),
+    path('check_payment_status/', views.check_payment_status, name='check_payment_status'),
 ]

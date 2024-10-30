@@ -42,53 +42,89 @@
 </style>
 
 <script>
-document.getElementById('pay-button').addEventListener('click', function() {
-    // Gather data from the form
-    const plan = document.querySelector('input[name="plan"]').value;
-    const amount = document.querySelector('input[name="amount"]').value;
-    const phoneNumber = document.getElementById('phone_number').value;
-
-    // Prepare data to send to the server
-    const data = {
-        plan: plan,
-        amount: amount,
-        phone_number: phoneNumber,
-    };
-
-    // Show loader and hide button text
-    const loader = document.getElementById('loader');
-    const buttonText = document.getElementById('button-text');
-    loader.classList.remove('hidden');
-    buttonText.classList.add('hidden');
-
-    fetch("{% url 'daraja' %}", {  
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'X-CSRFToken': '{{ csrf_token }}', 
-        },
-        body: JSON.stringify(data),
-    })
-    .then(response => response.json())
-    .then(data => {
-        // Hide loader and show button text
-        loader.classList.add('hidden');
-        buttonText.classList.remove('hidden');
-
-        if (data.success) {
-            alert('Payment successful!'); 
-            // Optionally redirect or show confirmation
-        } else {
-            alert('Payment failed: ' + data.message);
-        }
-    })
-    .catch((error) => {
-        console.error('Error:', error);
-        alert('An error occurred. Please try again.'); 
-        // Hide loader and show button text on error
-        loader.classList.add('hidden');
-        buttonText.classList.remove('hidden');
+    document.getElementById('pay-button').addEventListener('click', function() {
+        const plan = document.querySelector('input[name="plan"]').value;
+        const amount = document.querySelector('input[name="amount"]').value;
+        const phoneNumber = document.getElementById('phone_number').value;
+    
+        const data = {
+            plan: plan,
+            amount: amount,
+            phone_number: phoneNumber,
+        };
+    
+        const loader = document.getElementById('loader');
+        const buttonText = document.getElementById('button-text');
+        loader.classList.remove('hidden');
+        buttonText.classList.add('hidden');
+    
+        fetch("{% url 'daraja' %}", {  
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                'X-CSRFToken': '{{ csrf_token }}', 
+            },
+            body: JSON.stringify(data),
+        })
+        .then(response => response.json())
+        .then(data => {
+            loader.classList.add('hidden');
+            buttonText.classList.remove('hidden');
+    
+            if (data.success) {
+                alert('Payment initiated successfully!');
+                const checkoutRequestId = data.checkout_request_id;
+                pollPaymentStatus(checkoutRequestId);
+            } else {
+                alert('Payment failed: ' + data.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            alert('An error occurred. Please try again.');
+            loader.classList.add('hidden');
+            buttonText.classList.remove('hidden');
+        });
     });
-});
-</script>
+    
+    function pollPaymentStatus(checkoutRequestId) {
+        let attempts = 0;
+        const maxAttempts = 10;
+        const pollingInterval = 1000; 
+        const maxPollingTime = maxAttempts * pollingInterval; 
+    
+        const checkStatusInterval = setInterval(() => {
+            if (attempts >= maxAttempts) {
+                clearInterval(checkStatusInterval);
+                alert('Payment status check timed out. Please try again later.');
+                return;
+            }
+    
+            fetch("{% url 'check_payment_status' %}?checkout_request_id=" + checkoutRequestId, {  
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': '{{ csrf_token }}', 
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.is_processed) {
+                    clearInterval(checkStatusInterval);
+                    alert('Payment completed successfully!');
+                    window.location.href = "{% url 'problems' %}";  
+                } else {
+                    attempts++;
+                }
+            })
+            .catch(error => {
+                console.error('Error checking payment status:', error);
+            });
+        }, pollingInterval);
+        setTimeout(() => {
+            clearInterval(checkStatusInterval);
+        }, maxPollingTime);
+    }
+    </script>
+    
 {% endblock %}

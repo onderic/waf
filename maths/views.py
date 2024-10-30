@@ -192,35 +192,31 @@ def payment_page(request):
         phone_number = data.get('phone_number')
         amount = data.get('amount')  
 
-        # Validate phone number length and prefix
         if not (len(phone_number) == 10 and (phone_number.startswith("07") or phone_number.startswith("01"))):
             return JsonResponse({'success': False, 'message': 'Invalid phone number. It must be 10 digits long and start with 07 or 01.'})
 
-        if phone_number.startswith("07"):
-            phone_number = "254" + phone_number[2:]  
-        elif phone_number.startswith("01"):
-            phone_number = "254" + phone_number[2:]  
+        # Format phone number to start with 254
+        if phone_number.startswith("0"):
+            phone_number = "254" + phone_number[1:]
         
         lipa_na_mpesa = LipaNaMpesa()
     
         payload = {
             'amount': amount,
             'phone_number': phone_number,
-            'subscription': subscription.id,
+            'subscription': str(subscription.id), 
         }
-        print("payload details", payload)
-        
         response = lipa_na_mpesa.stk_push(payload)
         
         if response.get('ResponseCode') == '0': 
             checkout_request_id = response.get('CheckoutRequestID')
-
             Mpesa.objects.create(
                 subscription=subscription,
+                checkout_request_id=checkout_request_id,
                 is_processed=False
             )
             
-            request.session['subscription_id'] = subscription.id
+            request.session['subscription_id'] = str(subscription.id)
             request.session['checkout_request_id'] = checkout_request_id
 
             return JsonResponse({'success': True, 'checkout_request_id': checkout_request_id})
@@ -228,3 +224,45 @@ def payment_page(request):
             return JsonResponse({'success': False, 'message': 'Payment initiation failed. Please try again.'})
 
     return render(request, 'payment.html', {'subscription': subscription})
+
+
+@csrf_exempt
+def mpesa_callback(request):
+    if request.method == 'POST':
+        data = json.loads(request.body)
+        print("callback", data)
+
+        # Accessing nested data
+        callback_data = data.get('Body', {}).get('stkCallback', {})
+        checkout_request_id = callback_data.get('CheckoutRequestID')
+        result_code = callback_data.get('ResultCode')
+        result_description = callback_data.get('ResultDesc')
+
+        try:
+            # Fetch the transaction using checkout_request_id
+            transaction = Mpesa.objects.filter(checkout_request_id=checkout_request_id).first()
+            transaction.result_code = result_code
+            transaction.result_description = result_description
+            transaction.is_processed = result_code == 0
+            transaction.save()
+
+         
+            if transaction.is_processed:
+                subscription = transaction.subscription
+                subscription.activate_subscription()
+
+            return JsonResponse({'status': 'success'})
+        except Mpesa.DoesNotExist:
+            return JsonResponse({'status': 'failed', 'message': 'Transaction not found'})
+
+    return JsonResponse({'status': 'failed', 'message': 'Invalid request'})
+
+
+@csrf_exempt
+def check_payment_status(request):
+    checkout_request_id = request.GET.get('checkout_request_id')
+    try:
+        transaction = Mpesa.objects.filter(checkout_request_id=checkout_request_id).first()
+        return JsonResponse({'is_processed': transaction.is_processed})
+    except Mpesa.DoesNotExist:
+        return JsonResponse({'is_processed': False, 'message': 'Transaction not found'})

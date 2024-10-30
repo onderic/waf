@@ -7,6 +7,7 @@ from datetime import datetime
 from requests.auth import HTTPBasicAuth
 from maths.models import Subscription
 from maths.models import Mpesa
+from django.conf import settings
 
 
 class LipaNaMpesa:
@@ -19,7 +20,7 @@ class LipaNaMpesa:
         self.access_token_url = "https://sandbox.safaricom.co.ke/oauth/v1/generate?grant_type=client_credentials"
         self.stk_push_url = "https://sandbox.safaricom.co.ke/mpesa/stkpush/v1/processrequest"
         self.access_token = None
-        self.call_back = "https://62d5-41-89-162-2.ngrok-free.app"
+        self.call_back = settings.MPESA_CALLBACK_URL
         self.access_token_expiration = 0
         self.headers = None  
 
@@ -93,12 +94,13 @@ class LipaNaMpesa:
             # Retrieve the subscription
             subscription = Subscription.objects.get(id=subscription_id)
             
-            Mpesa.objects.create(
+            obj = Mpesa.objects.create(
                 subscription=subscription,
                 checkout_request_id=checkout_request_id,
                 merchant_request_id=merchant_request_id,
                 is_processed=False 
             )
+            print("response", obj)
             
             return response.json()
 
